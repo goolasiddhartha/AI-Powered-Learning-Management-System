@@ -1,0 +1,1916 @@
+I want to build a complete full-stack web application called:
+
+"AI-Powered Learning Management System"
+
+The project is primarily a Backend Web Development project, but it must include a modern Angular frontend and Generative AI features.
+
+The application should be production-style, modular, scalable, secure, and easy to understand for a student project.
+
+==================================================
+1. TECHNOLOGY STACK
+==================================================
+
+Frontend:
+- Angular
+- TypeScript
+- Angular Router
+- Angular Reactive Forms
+- Angular HttpClient
+- Angular Material or a clean modern CSS UI
+- JWT authentication
+- Role-based route protection
+
+Backend:
+- Python
+- FastAPI
+- Pydantic
+- JWT authentication
+- Password hashing using bcrypt/passlib or an appropriate secure library
+- RESTful API architecture
+- Modular backend structure
+
+Database:
+- MongoDB
+- MongoDB Atlas
+- Motor/PyMongo for database access
+- Proper MongoDB collections and indexes
+
+Generative AI:
+- Google Gemini API
+- LangChain
+- RAG (Retrieval-Augmented Generation)
+- Embeddings
+- MongoDB Atlas Vector Search if available
+- AI Tutor
+- AI Quiz Generator
+- AI Lesson Summarizer
+- AI Performance Analyzer
+- Personalized Learning Recommendations
+
+Development:
+- Environment variables for secrets
+- .env file
+- .gitignore
+- API documentation using FastAPI Swagger/OpenAPI
+- Proper error handling
+- Logging
+- Clean folder structure
+- Reusable Angular components
+- Reusable backend services
+- No hardcoded API keys
+
+
+==================================================
+2. PROJECT OBJECTIVE
+==================================================
+
+Build a Learning Management System where:
+
+1. Admins manage users, roles, courses, and the overall platform.
+2. Instructors create and manage courses and lessons.
+3. Students enroll in courses and learn through lessons.
+4. Students can take quizzes and track their progress.
+5. The system stores student activity and performance.
+6. Generative AI provides intelligent learning assistance.
+7. Students can ask questions about their course material using an AI Tutor.
+8. AI can generate quizzes from lesson content.
+9. AI can summarize lessons.
+10. AI can analyze student performance.
+11. AI can recommend what the student should study next.
+
+
+==================================================
+3. IMPORTANT DOMAIN CONCEPTS
+==================================================
+
+Before implementing the application, understand and implement these concepts correctly:
+
+-------------------------
+USER
+-------------------------
+
+A User represents a person who uses the LMS.
+
+Every user should have information such as:
+
+- id
+- firstName
+- lastName
+- email
+- passwordHash
+- role
+- profileImage
+- bio
+- isActive
+- createdAt
+- updatedAt
+
+Do not store plain-text passwords.
+
+A user can have one of the following roles:
+
+- ADMIN
+- INSTRUCTOR
+- STUDENT
+
+The role determines what the user is allowed to do.
+
+Examples:
+
+Student:
+- View courses
+- Enroll in courses
+- View lessons
+- Track learning progress
+- Take quizzes
+- Ask AI Tutor questions
+- Generate lesson summaries
+- View AI recommendations
+
+Instructor:
+- Create courses
+- Update courses
+- Delete their own courses
+- Create lessons
+- Update lessons
+- Delete lessons
+- Create quizzes
+- View student enrollment
+- View student progress
+- Generate AI quizzes
+- Generate lesson summaries
+
+Admin:
+- Manage all users
+- Activate/deactivate users
+- Manage all courses
+- Manage categories
+- View platform statistics
+- Manage roles
+- Access administrative dashboard
+
+
+==================================================
+4. ROLE-BASED ACCESS CONTROL
+==================================================
+
+Implement Role-Based Access Control.
+
+The backend must never trust the frontend role.
+
+The frontend can hide UI elements, but the backend must independently verify permissions.
+
+For example:
+
+Student must NOT be able to call:
+
+POST /courses
+
+Instructor can call:
+
+POST /courses
+
+Admin can manage all courses.
+
+An instructor should normally only be able to modify courses that they own.
+
+Create reusable authorization logic.
+
+Example:
+
+require_role("ADMIN")
+
+require_role("INSTRUCTOR", "ADMIN")
+
+require_role("STUDENT")
+
+
+==================================================
+5. COURSE
+==================================================
+
+A Course represents a complete learning program.
+
+A course should contain:
+
+- id
+- title
+- description
+- shortDescription
+- thumbnail
+- category
+- instructorId
+- instructorName
+- difficulty
+- duration
+- language
+- prerequisites
+- learningObjectives
+- status
+- lessons
+- enrollmentCount
+- createdAt
+- updatedAt
+
+Difficulty can be:
+
+- BEGINNER
+- INTERMEDIATE
+- ADVANCED
+
+Status can be:
+
+- DRAFT
+- PUBLISHED
+- ARCHIVED
+
+Only PUBLISHED courses should normally be visible to students.
+
+An instructor can create a course in DRAFT status.
+
+After completing the course content, the instructor can publish it.
+
+The course page should display:
+
+- Course title
+- Description
+- Instructor
+- Difficulty
+- Duration
+- Number of lessons
+- Learning objectives
+- Prerequisites
+- Course curriculum
+- Enrollment button
+- Student progress if already enrolled
+
+
+==================================================
+6. LESSON
+==================================================
+
+A Lesson represents an individual learning unit inside a course.
+
+A course consists of multiple lessons.
+
+Example:
+
+Course:
+"Python Programming"
+
+Lessons:
+
+1. Introduction to Python
+2. Variables and Data Types
+3. Conditional Statements
+4. Loops
+5. Functions
+6. Object-Oriented Programming
+7. File Handling
+
+Each lesson should contain:
+
+- id
+- courseId
+- title
+- description
+- order
+- content
+- videoUrl
+- resources
+- estimatedMinutes
+- isPublished
+- createdAt
+- updatedAt
+
+The "order" field determines the sequence of lessons.
+
+Students should be able to navigate:
+
+Previous Lesson
+Current Lesson
+Next Lesson
+
+A lesson can contain:
+
+- Text content
+- Video
+- PDF/resource links
+- Code examples
+- Images
+- Learning objectives
+
+When a student opens a lesson, the backend should record that the lesson was accessed.
+
+When the student completes the lesson, progress should be updated.
+
+
+==================================================
+7. COURSE VS LESSON
+==================================================
+
+Understand the difference:
+
+COURSE = Complete learning program
+
+LESSON = Individual learning unit inside a course
+
+Example:
+
+Course:
+"Full Stack Web Development"
+
+Lessons:
+
+Lesson 1:
+Introduction to Web Development
+
+Lesson 2:
+HTML
+
+Lesson 3:
+CSS
+
+Lesson 4:
+JavaScript
+
+Lesson 5:
+REST APIs
+
+Lesson 6:
+Angular
+
+Lesson 7:
+Backend Development
+
+Lesson 8:
+Database
+
+The course provides the overall learning structure.
+
+Lessons provide the actual learning content.
+
+
+==================================================
+8. ENROLLMENT
+==================================================
+
+Create a separate Enrollment concept.
+
+An enrollment represents the relationship between:
+
+Student + Course
+
+Enrollment should contain:
+
+- id
+- studentId
+- courseId
+- enrolledAt
+- completedAt
+- status
+- progressPercentage
+- lastAccessedLessonId
+
+Status:
+
+- ACTIVE
+- COMPLETED
+- DROPPED
+
+A student should not be able to enroll in the same course multiple times.
+
+Create a unique index for:
+
+studentId + courseId
+
+
+==================================================
+9. PROGRESS TRACKING
+==================================================
+
+The system must track student learning progress.
+
+Track:
+
+- completed lessons
+- current lesson
+- lesson completion dates
+- course percentage
+- quiz scores
+- total quizzes attempted
+- average quiz score
+- last activity
+
+Example:
+
+Course:
+Python Programming
+
+Progress:
+
+Introduction → Completed
+Variables → Completed
+Conditions → Completed
+Loops → In Progress
+Functions → Not Started
+
+Overall:
+
+Progress = 43%
+
+The backend should calculate progress rather than trusting a percentage sent by the frontend.
+
+
+==================================================
+10. QUIZ SYSTEM
+==================================================
+
+Create a quiz system.
+
+A quiz belongs to a course or lesson.
+
+Quiz should contain:
+
+- id
+- courseId
+- lessonId
+- title
+- description
+- questions
+- timeLimit
+- passingScore
+- createdBy
+- createdAt
+
+Question should contain:
+
+- id
+- question
+- type
+- options
+- correctAnswer
+- explanation
+- marks
+
+Support:
+
+- MCQ
+- TRUE_FALSE
+
+Do not expose correct answers to the student before submission.
+
+When the student submits a quiz:
+
+1. Backend receives answers.
+2. Backend validates the submission.
+3. Backend calculates score.
+4. Backend stores quiz attempt.
+5. Backend updates student performance.
+6. Backend updates course progress.
+
+
+==================================================
+11. QUIZ ATTEMPT
+==================================================
+
+Create QuizAttempt.
+
+Fields:
+
+- id
+- studentId
+- quizId
+- answers
+- score
+- percentage
+- passed
+- attemptedAt
+- timeTaken
+
+Students should be able to view their previous attempts.
+
+Instructors should be able to see aggregated student performance for their courses.
+
+
+==================================================
+12. ASSIGNMENTS
+==================================================
+
+Optionally implement assignments.
+
+Assignment:
+
+- id
+- courseId
+- lessonId
+- title
+- description
+- instructions
+- dueDate
+- maxMarks
+- createdBy
+
+Submission:
+
+- id
+- assignmentId
+- studentId
+- content
+- submittedAt
+- marks
+- feedback
+- status
+
+AI can optionally provide feedback, but AI feedback should be clearly marked as AI-generated assistance.
+
+
+==================================================
+13. COURSE MATERIALS
+==================================================
+
+Instructors should be able to upload learning materials.
+
+Supported examples:
+
+- PDF
+- TXT
+- DOCX
+- Markdown
+
+A course can contain multiple documents.
+
+Example:
+
+Course:
+"Machine Learning"
+
+Materials:
+
+- Introduction.pdf
+- Linear Regression.pdf
+- Classification.pdf
+- Decision Trees.pdf
+- Neural Networks.pdf
+
+
+==================================================
+14. GENERATIVE AI ARCHITECTURE
+==================================================
+
+Generative AI should not be a separate chatbot disconnected from the LMS.
+
+AI must use actual LMS data.
+
+The architecture should be:
+
+Angular
+    ↓
+FastAPI
+    ↓
+AI Service
+    ↓
+LangChain
+    ↓
+Gemini
+    ↓
+MongoDB / Vector Search
+
+
+==================================================
+15. AI TUTOR
+==================================================
+
+Implement an AI Tutor.
+
+Students can ask:
+
+"What is overfitting?"
+
+"Explain this lesson in simple terms."
+
+"What is the difference between classification and regression?"
+
+"Give me an example."
+
+The AI Tutor should preferably answer based on the student's current course material.
+
+Architecture:
+
+Student Question
+       ↓
+FastAPI
+       ↓
+AI Tutor Service
+       ↓
+Generate Query Embedding
+       ↓
+Vector Search
+       ↓
+Retrieve Relevant Course Content
+       ↓
+LangChain
+       ↓
+Gemini
+       ↓
+Context-Aware Answer
+       ↓
+Student
+
+
+==================================================
+16. RAG IMPLEMENTATION
+==================================================
+
+Implement Retrieval-Augmented Generation.
+
+When an instructor uploads a document:
+
+PDF
+ ↓
+Extract Text
+ ↓
+Clean Text
+ ↓
+Split into Chunks
+ ↓
+Generate Embeddings
+ ↓
+Store Embeddings
+ ↓
+MongoDB Vector Search
+
+Store metadata such as:
+
+- courseId
+- lessonId
+- documentId
+- title
+- chunkText
+- embedding
+
+When a student asks a question:
+
+Question
+ ↓
+Embedding
+ ↓
+Vector Search
+ ↓
+Relevant Chunks
+ ↓
+Prompt
+ ↓
+Gemini
+ ↓
+Answer
+
+The AI should prioritize course material.
+
+If the answer cannot be found in the provided course content, the AI should clearly state that the information was not found in the course material rather than pretending it was.
+
+
+==================================================
+17. AI CHAT HISTORY
+==================================================
+
+Store AI conversations.
+
+AIConversation:
+
+- id
+- studentId
+- courseId
+- lessonId
+- messages
+- createdAt
+- updatedAt
+
+Message:
+
+- role
+- content
+- timestamp
+
+Roles:
+
+- user
+- assistant
+
+Students should be able to continue previous AI Tutor conversations.
+
+
+==================================================
+18. AI QUIZ GENERATOR
+==================================================
+
+Create an AI Quiz Generator.
+
+Instructor selects:
+
+Course
+Lesson
+Number of questions
+Difficulty
+Question type
+
+Example:
+
+Lesson:
+"Python Functions"
+
+Number:
+10
+
+Difficulty:
+Medium
+
+Type:
+MCQ
+
+The AI generates questions.
+
+The backend must validate the AI response before saving it.
+
+Expected structured output:
+
+{
+    "questions": [
+        {
+            "question": "...",
+            "options": ["A", "B", "C", "D"],
+            "correctAnswer": "A",
+            "explanation": "...",
+            "marks": 1
+        }
+    ]
+}
+
+The instructor must be able to preview and edit AI-generated questions before publishing them.
+
+
+==================================================
+19. AI LESSON SUMMARIZER
+==================================================
+
+Add a "Summarize with AI" button.
+
+Student selects:
+
+- Short Summary
+- Detailed Summary
+- Key Points
+- Exam Revision Notes
+
+The AI should summarize the actual lesson content.
+
+Example:
+
+Lesson:
+"Introduction to Machine Learning"
+
+AI output:
+
+Summary
+
+Key Concepts:
+- Supervised Learning
+- Unsupervised Learning
+- Classification
+- Regression
+
+Important Points:
+...
+
+Do not summarize unrelated information.
+
+
+==================================================
+20. AI PERFORMANCE ANALYSIS
+==================================================
+
+Use real student performance data.
+
+Example:
+
+Python:
+85%
+
+SQL:
+78%
+
+Machine Learning:
+61%
+
+Statistics:
+45%
+
+The backend sends structured performance information to the AI.
+
+The AI generates:
+
+- Strengths
+- Weak areas
+- Recommended topics
+- Study suggestions
+
+Example:
+
+"Your strongest area is Python. Your Statistics score is comparatively low. Review probability and statistical distributions before attempting advanced machine learning topics."
+
+
+==================================================
+21. PERSONALIZED RECOMMENDATIONS
+==================================================
+
+Create an AI recommendation system.
+
+Use:
+
+- Enrolled courses
+- Completed lessons
+- Quiz scores
+- Weak topics
+- Course categories
+- Learning history
+
+The AI should recommend:
+
+- Next lesson
+- Revision topic
+- Quiz
+- Course
+- Learning path
+
+Example:
+
+Student has:
+
+Statistics → 45%
+Machine Learning → 60%
+
+AI recommends:
+
+1. Probability Basics
+2. Descriptive Statistics
+3. Statistical Distributions
+4. Machine Learning Fundamentals
+
+
+==================================================
+22. FRONTEND - ANGULAR
+==================================================
+
+Create a professional Angular frontend.
+
+Main pages:
+
+PUBLIC:
+
+/login
+/register
+/forgot-password
+
+STUDENT:
+
+/student/dashboard
+/student/courses
+/student/courses/:id
+/student/courses/:id/learn
+/student/courses/:id/lessons/:lessonId
+/student/quizzes/:id
+/student/progress
+/student/ai-tutor
+/student/recommendations
+/student/profile
+
+INSTRUCTOR:
+
+/instructor/dashboard
+/instructor/courses
+/instructor/courses/create
+/instructor/courses/:id/edit
+/instructor/courses/:id/lessons
+/instructor/courses/:id/quizzes
+/instructor/courses/:id/students
+/instructor/ai-tools
+
+ADMIN:
+
+/admin/dashboard
+/admin/users
+/admin/courses
+/admin/categories
+/admin/settings
+
+
+==================================================
+23. ANGULAR COMPONENTS
+==================================================
+
+Create reusable components:
+
+Navbar
+Sidebar
+Footer
+CourseCard
+CourseList
+LessonList
+LessonViewer
+ProgressBar
+QuizCard
+QuizQuestion
+DashboardCard
+AIChat
+ChatMessage
+RecommendationCard
+UserTable
+CourseForm
+LessonForm
+QuizForm
+LoadingSpinner
+ConfirmationDialog
+ErrorMessage
+
+
+==================================================
+24. ANGULAR AUTHENTICATION
+==================================================
+
+Implement:
+
+AuthService
+
+Store JWT securely according to the application architecture.
+
+Create:
+
+AuthGuard
+RoleGuard
+
+Examples:
+
+/admin/* → ADMIN only
+
+/instructor/* → INSTRUCTOR and ADMIN
+
+/student/* → STUDENT
+
+Do not rely only on Angular guards.
+
+Backend authorization is mandatory.
+
+
+==================================================
+25. STUDENT DASHBOARD
+==================================================
+
+Student dashboard should show:
+
+Welcome message
+
+Enrolled Courses
+
+Continue Learning
+
+Overall Progress
+
+Recent Quiz Scores
+
+Recommended Courses
+
+AI Recommendations
+
+Recent AI Tutor Conversations
+
+Example:
+
+----------------------------------
+Welcome, Student
+----------------------------------
+
+Continue Learning
+
+Machine Learning
+Progress: 62%
+[Continue]
+
+----------------------------------
+
+My Courses
+
+Python       85%
+SQL          72%
+ML           62%
+
+----------------------------------
+
+AI Recommendation
+
+"Review Classification before
+continuing to Neural Networks."
+
+[Study Now]
+
+----------------------------------
+
+AI Tutor
+
+[ Ask your course AI anything... ]
+
+
+==================================================
+26. INSTRUCTOR DASHBOARD
+==================================================
+
+Instructor dashboard should show:
+
+Total Courses
+Published Courses
+Total Students
+Average Student Progress
+Quiz Performance
+
+Recent Courses
+
+Course management
+
+AI tools:
+
+- Generate Quiz
+- Summarize Lesson
+- Generate Learning Objectives
+- Generate Course Description
+
+
+==================================================
+27. ADMIN DASHBOARD
+==================================================
+
+Admin dashboard should show:
+
+Total Users
+Total Students
+Total Instructors
+Total Courses
+Published Courses
+Total Enrollments
+
+Recent Users
+
+Recent Courses
+
+User management
+
+Course management
+
+
+==================================================
+28. COURSE CREATION FLOW
+==================================================
+
+Instructor:
+
+Create Course
+ ↓
+Enter Title
+ ↓
+Description
+ ↓
+Category
+ ↓
+Difficulty
+ ↓
+Learning Objectives
+ ↓
+Prerequisites
+ ↓
+Create Course
+ ↓
+Add Lessons
+ ↓
+Upload Materials
+ ↓
+Generate AI Summary
+ ↓
+Generate AI Quiz
+ ↓
+Review Content
+ ↓
+Publish Course
+
+
+==================================================
+29. STUDENT LEARNING FLOW
+==================================================
+
+Student:
+
+Register
+ ↓
+Login
+ ↓
+Browse Courses
+ ↓
+View Course
+ ↓
+Enroll
+ ↓
+Open First Lesson
+ ↓
+Read/Watch Lesson
+ ↓
+Mark Complete
+ ↓
+Next Lesson
+ ↓
+Take Quiz
+ ↓
+Receive Score
+ ↓
+Progress Updated
+ ↓
+AI Analyzes Performance
+ ↓
+AI Recommends Next Learning Activity
+
+
+==================================================
+30. MONGODB COLLECTIONS
+==================================================
+
+Create appropriate MongoDB collections:
+
+users
+roles or role configuration
+courses
+lessons
+enrollments
+progress
+quizzes
+quiz_attempts
+assignments
+submissions
+course_materials
+document_chunks
+ai_conversations
+ai_summaries
+ai_recommendations
+categories
+
+Use MongoDB ObjectId.
+
+Create appropriate indexes.
+
+Important indexes should include:
+
+users.email
+courses.instructorId
+courses.status
+lessons.courseId
+enrollments.studentId
+enrollments.courseId
+quiz_attempts.studentId
+quiz_attempts.quizId
+
+Create a compound unique index for:
+
+enrollments:
+studentId + courseId
+
+
+==================================================
+31. BACKEND API STRUCTURE
+==================================================
+
+Create REST APIs.
+
+AUTH:
+
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/me
+
+USERS:
+
+GET /api/users
+GET /api/users/{id}
+PUT /api/users/{id}
+DELETE /api/users/{id}
+
+COURSES:
+
+POST /api/courses
+GET /api/courses
+GET /api/courses/{id}
+PUT /api/courses/{id}
+DELETE /api/courses/{id}
+POST /api/courses/{id}/publish
+
+LESSONS:
+
+POST /api/courses/{courseId}/lessons
+GET /api/courses/{courseId}/lessons
+GET /api/lessons/{id}
+PUT /api/lessons/{id}
+DELETE /api/lessons/{id}
+
+ENROLLMENTS:
+
+POST /api/courses/{courseId}/enroll
+GET /api/enrollments/my-courses
+
+PROGRESS:
+
+GET /api/progress/course/{courseId}
+POST /api/progress/lesson/{lessonId}/complete
+
+QUIZZES:
+
+POST /api/quizzes
+GET /api/quizzes/{id}
+POST /api/quizzes/{id}/submit
+GET /api/quizzes/{id}/attempts
+
+AI:
+
+POST /api/ai/tutor
+POST /api/ai/summarize
+POST /api/ai/generate-quiz
+GET /api/ai/recommendations
+POST /api/ai/analyze-performance
+
+MATERIALS:
+
+POST /api/materials/upload
+GET /api/materials/course/{courseId}
+DELETE /api/materials/{id}
+
+
+==================================================
+32. BACKEND FOLDER STRUCTURE
+==================================================
+
+Use a clean structure such as:
+
+backend/
+
+app/
+    main.py
+
+    core/
+        config.py
+        security.py
+        database.py
+
+    models/
+        user.py
+        course.py
+        lesson.py
+        enrollment.py
+        progress.py
+        quiz.py
+        assignment.py
+        ai.py
+
+    schemas/
+        user.py
+        course.py
+        lesson.py
+        quiz.py
+        auth.py
+        ai.py
+
+    routes/
+        auth.py
+        users.py
+        courses.py
+        lessons.py
+        enrollments.py
+        progress.py
+        quizzes.py
+        materials.py
+        ai.py
+
+    services/
+        auth_service.py
+        course_service.py
+        progress_service.py
+        quiz_service.py
+
+    ai/
+        llm.py
+        embeddings.py
+        rag.py
+        tutor.py
+        quiz_generator.py
+        summarizer.py
+        recommendations.py
+        performance.py
+
+    utils/
+        validators.py
+        helpers.py
+
+requirements.txt
+.env
+.env.example
+.gitignore
+
+
+==================================================
+33. ANGULAR FOLDER STRUCTURE
+==================================================
+
+frontend/
+
+src/app/
+
+core/
+    guards/
+    interceptors/
+    services/
+    models/
+
+features/
+
+    auth/
+        login/
+        register/
+
+    student/
+        dashboard/
+        courses/
+        learning/
+        progress/
+        ai-tutor/
+        recommendations/
+
+    instructor/
+        dashboard/
+        courses/
+        lessons/
+        quizzes/
+        ai-tools/
+
+    admin/
+        dashboard/
+        users/
+        courses/
+
+shared/
+    components/
+    pipes/
+    directives/
+
+layout/
+    navbar/
+    sidebar/
+    footer/
+
+
+==================================================
+34. SECURITY REQUIREMENTS
+==================================================
+
+Implement:
+
+- Password hashing
+- JWT authentication
+- Token expiration
+- Role-based authorization
+- Input validation
+- File upload validation
+- File size restrictions
+- CORS configuration
+- Environment variables
+- API error handling
+- Rate limiting for AI endpoints if appropriate
+- Do not expose API keys
+- Do not expose passwords
+- Do not expose correct quiz answers before submission
+
+The backend must validate ownership.
+
+Example:
+
+An instructor cannot edit another instructor's course merely by changing the course ID in the API request.
+
+
+==================================================
+35. AI SECURITY
+==================================================
+
+Do not blindly send arbitrary user data to the LLM.
+
+Validate:
+
+- user
+- course
+- lesson
+- permissions
+- document ownership
+
+For AI Tutor:
+
+A student should only be able to retrieve content from courses they are enrolled in.
+
+Do not allow:
+
+Student A
+ ↓
+AI Tutor
+ ↓
+Retrieve Student B's private course material
+
+Use courseId and access control during retrieval.
+
+
+==================================================
+36. AI PROMPT DESIGN
+==================================================
+
+Create dedicated prompts for each AI feature.
+
+Do not use one giant prompt for everything.
+
+Examples:
+
+Tutor Prompt
+
+"You are an AI tutor for an online learning platform.
+Answer the student's question using the provided course context.
+Explain concepts clearly and at an appropriate educational level.
+If the answer cannot be found in the supplied course context,
+say that the information is not available in the course material.
+Do not fabricate course-specific information."
+
+
+Quiz Prompt
+
+"You are an educational assessment generator.
+Generate multiple-choice questions from the supplied lesson content.
+Questions must be based only on the supplied content.
+Return structured JSON.
+Include the correct answer and a short explanation."
+
+
+Summary Prompt
+
+"You are an educational content summarizer.
+Summarize the supplied lesson content.
+Preserve important definitions, concepts and examples.
+Do not introduce unsupported information."
+
+
+==================================================
+37. ERROR HANDLING
+==================================================
+
+Use proper HTTP status codes.
+
+Examples:
+
+400 → Bad Request
+401 → Unauthorized
+403 → Forbidden
+404 → Not Found
+409 → Conflict
+422 → Validation Error
+500 → Internal Server Error
+
+Return consistent error responses.
+
+Example:
+
+{
+    "success": false,
+    "message": "Course not found"
+}
+
+
+==================================================
+38. API RESPONSE FORMAT
+==================================================
+
+Use consistent responses.
+
+Success:
+
+{
+    "success": true,
+    "message": "Course retrieved successfully",
+    "data": {...}
+}
+
+Error:
+
+{
+    "success": false,
+    "message": "You are not authorized to perform this action"
+}
+
+
+==================================================
+39. DATABASE RELATIONSHIPS
+==================================================
+
+Use MongoDB references.
+
+Important relationships:
+
+User
+ |
+ ├── Enrollment
+ │       |
+ │       └── Course
+ │               |
+ │               ├── Lessons
+ │               ├── Quizzes
+ │               └── Materials
+ |
+ ├── Progress
+ |
+ ├── Quiz Attempts
+ |
+ └── AI Conversations
+
+
+Course
+ |
+ ├── Instructor
+ ├── Lessons
+ ├── Enrollments
+ ├── Quizzes
+ └── Materials
+
+
+Lesson
+ |
+ ├── Course
+ ├── Quiz
+ └── Course Material
+
+
+==================================================
+40. DASHBOARD ANALYTICS
+==================================================
+
+Implement backend endpoints that calculate:
+
+Student:
+
+- enrolled courses
+- completed courses
+- total lessons completed
+- overall progress
+- average quiz score
+- strongest topics
+- weakest topics
+
+Instructor:
+
+- number of courses
+- number of students
+- course completion rate
+- average quiz score
+- student performance
+
+Admin:
+
+- total users
+- students
+- instructors
+- courses
+- enrollments
+- published courses
+
+
+==================================================
+41. UI/UX REQUIREMENTS
+==================================================
+
+Create a clean modern educational platform.
+
+Use:
+
+- Responsive design
+- Sidebar dashboard
+- Cards
+- Tables
+- Progress bars
+- Course cards
+- Modal dialogs
+- Toast notifications
+- Loading states
+- Empty states
+- Error states
+
+The application should look like a real LMS, not a basic CRUD demonstration.
+
+Use consistent typography, spacing, buttons and forms.
+
+
+==================================================
+42. DEVELOPMENT APPROACH
+==================================================
+
+Do NOT generate the entire application as one giant block of code.
+
+Build it incrementally.
+
+Phase 1:
+Project setup
+
+Phase 2:
+MongoDB connection
+
+Phase 3:
+User authentication
+
+Phase 4:
+Role-based authorization
+
+Phase 5:
+Course management
+
+Phase 6:
+Lesson management
+
+Phase 7:
+Enrollment
+
+Phase 8:
+Progress tracking
+
+Phase 9:
+Quiz system
+
+Phase 10:
+Angular student dashboard
+
+Phase 11:
+Angular instructor dashboard
+
+Phase 12:
+Angular admin dashboard
+
+Phase 13:
+Course material upload
+
+Phase 14:
+RAG pipeline
+
+Phase 15:
+AI Tutor
+
+Phase 16:
+AI Quiz Generator
+
+Phase 17:
+AI Summarizer
+
+Phase 18:
+AI Performance Analyzer
+
+Phase 19:
+AI Recommendations
+
+Phase 20:
+Testing
+
+Phase 21:
+Deployment
+
+
+==================================================
+43. TESTING
+==================================================
+
+Create tests for:
+
+Authentication
+Authorization
+Course CRUD
+Lesson CRUD
+Enrollment
+Progress
+Quiz submission
+AI endpoints
+RAG retrieval
+Role restrictions
+
+Test cases should include:
+
+- Student cannot create course
+- Instructor can create course
+- Instructor cannot modify another instructor's course
+- Admin can manage all courses
+- Student cannot access another student's private data
+- Student can enroll only once
+- Correct quiz score is calculated
+- AI Tutor retrieves only authorized course material
+
+
+==================================================
+44. DOCUMENTATION
+==================================================
+
+Create README.md containing:
+
+Project title
+Project description
+Features
+Architecture
+Technology stack
+Folder structure
+Database design
+API documentation
+Authentication
+Role-based authorization
+GenAI architecture
+RAG architecture
+Installation instructions
+Environment variables
+How to run backend
+How to run frontend
+How to configure MongoDB
+How to configure Gemini
+Testing instructions
+Future improvements
+
+
+==================================================
+45. ENVIRONMENT VARIABLES
+==================================================
+
+Create .env.example.
+
+Example:
+
+MONGODB_URI=
+DATABASE_NAME=
+JWT_SECRET=
+JWT_EXPIRE_MINUTES=
+GEMINI_API_KEY=
+EMBEDDING_MODEL=
+FRONTEND_URL=
+
+
+Never commit the actual .env file.
+
+
+==================================================
+46. IMPORTANT IMPLEMENTATION RULES
+==================================================
+
+1. Use clean, readable code.
+2. Follow separation of concerns.
+3. Keep routes/controllers thin.
+4. Put business logic inside services.
+5. Keep AI functionality inside dedicated AI services.
+6. Validate all input.
+7. Never trust frontend authorization.
+8. Never expose passwords.
+9. Never hardcode API keys.
+10. Use async operations where appropriate.
+11. Use reusable Angular components.
+12. Use typed TypeScript models.
+13. Use proper HTTP status codes.
+14. Add meaningful comments only where necessary.
+15. Avoid duplicate code.
+16. Do not create unnecessary complexity.
+17. Do not use fake/mock data in the final implementation unless explicitly required for development.
+18. AI-generated quiz questions must be reviewed before publishing.
+19. AI should use actual course/lesson data.
+20. The project should remain understandable for a student developer.
+
+
+==================================================
+47. FINAL PROJECT ARCHITECTURE
+==================================================
+
+The final architecture should conceptually look like:
+
+                    ANGULAR
+                       |
+                       |
+                  REST APIs
+                       |
+                       ↓
+                   FASTAPI
+                       |
+        ┌──────────────┼───────────────┐
+        |              |               |
+        ↓              ↓               ↓
+   Authentication   LMS Services    AI Services
+        |              |               |
+        |              |               ↓
+        |              |           LangChain
+        |              |               |
+        ↓              ↓          ┌────┴────┐
+     MongoDB       MongoDB        ↓         ↓
+                                 RAG      Gemini
+                                  |
+                                  ↓
+                         MongoDB Vector Search
+
+
+==================================================
+48. EXPECTED FINAL FEATURES
+==================================================
+
+The completed system should provide:
+
+ADMIN:
+- User management
+- Course management
+- Platform analytics
+
+INSTRUCTOR:
+- Course creation
+- Lesson creation
+- Material upload
+- Quiz creation
+- Student performance
+- AI quiz generation
+- AI content generation
+
+STUDENT:
+- Course browsing
+- Course enrollment
+- Lesson learning
+- Progress tracking
+- Quiz attempts
+- Performance dashboard
+- AI Tutor
+- Lesson summarization
+- Personalized recommendations
+
+GENERATIVE AI:
+- RAG-based AI Tutor
+- AI Quiz Generator
+- AI Lesson Summarizer
+- AI Performance Analysis
+- Personalized Learning Recommendations
+
+
+==================================================
+49. STARTING REQUIREMENT
+==================================================
+
+Start by creating the complete project architecture and folder structure.
+
+Do NOT implement all features immediately.
+
+First provide:
+
+1. System architecture
+2. Database design
+3. MongoDB collections
+4. API structure
+5. Angular module/component structure
+6. Authentication flow
+7. Role-based authorization flow
+8. AI architecture
+9. RAG architecture
+10. Development roadmap
+
+Then implement the project phase-by-phase.
+
+For each phase:
+
+- Explain what is being built.
+- Explain why it is required.
+- Create the necessary files.
+- Provide complete code.
+- Explain how the files interact.
+- Provide commands to run the application.
+- Provide API testing examples.
+- Do not skip configuration.
+- Do not assume that previous files exist unless they were created in an earlier phase.
+
+The final result must be a functional full-stack AI-powered Learning Management System using:
+
+Angular + FastAPI + MongoDB + LangChain + Gemini + RAG.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+chatgpt Link:
+==============
+https://chatgpt.com/share/6a9d9563-8924-83e8-a327-dafe054d6ab8 

@@ -1,0 +1,27 @@
+# Secrets
+.env
+**/.env
+
+# Python
+backend/.venv/
+backend/venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+project/node_modules/
+project/dist/
+project/.angular/
+
+# Uploads & OS
+backend/uploads/*
+!backend/uploads/.gitkeep
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
