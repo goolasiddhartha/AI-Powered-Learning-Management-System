@@ -1,16 +1,24 @@
-.env
+# Python virtual environments
 .venv/
 venv/
+**/.venv/
+**/venv/
+
+# Python cache
 __pycache__/
-*.py[cod]
-*.egg-info/
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
-uploads/*
-!uploads/.gitkeep
-.DS_Store
-*.log
-.idea/
-.vscode/
+*.pyc
+
+# Node
+node_modules/
+
+# Angular build output
+dist/
+.angular/
+
+# Uploaded/generated files
+uploads/
+
+# Environment files
+.env
+.env.*
+!.env.example
