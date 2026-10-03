@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -106,7 +106,20 @@ export class AuthService {
   }
 
   private readError(err: unknown, fallback: string): string {
-    const httpErr = err as { error?: { message?: string } };
-    return httpErr?.error?.message ?? fallback;
+    if (err instanceof HttpErrorResponse) {
+      if (err.status === 0) {
+        return 'Cannot reach the server. Check that the backend is running and try again.';
+      }
+      const response: unknown = err.error;
+      if (
+        typeof response === 'object' &&
+        response !== null &&
+        'message' in response &&
+        typeof response.message === 'string'
+      ) {
+        return response.message;
+      }
+    }
+    return fallback;
   }
 }

@@ -186,7 +186,11 @@ export class LearnComponent implements OnInit {
       );
       this.progressPercentage.set(progress.progressPercentage);
       this.progressLoadAttempted = true;
-      this.toast.success('Lesson marked complete');
+      this.toast.success(
+        progress.enrollmentStatus === 'COMPLETED'
+          ? 'Course completed! Your LearnAI certificate is ready in Certificates.'
+          : 'Lesson marked complete'
+      );
       if (this.nextId()) {
         await this.openLesson(this.nextId()!);
       }

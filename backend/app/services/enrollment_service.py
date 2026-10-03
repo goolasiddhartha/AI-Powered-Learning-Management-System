@@ -7,8 +7,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo.errors import DuplicateKeyError
 
 from app.models.enums import CourseStatus, EnrollmentStatus, UserRole
-from app.schemas.enrollment import EnrollmentOut
-from app.services.course_service import serialize_course
+from app.schemas.enrollment import CourseStudentOut, EnrollmentOut
+from app.services.course_service import CourseService, serialize_course
 from app.utils.helpers import parse_object_id
 from app.utils.responses import ApiError
 
@@ -81,6 +81,31 @@ class EnrollmentService:
                 lesson_count = await self.db.lessons.count_documents({"courseId": doc["courseId"]})
                 course_out = serialize_course(course, lesson_count)
             items.append(serialize_enrollment(doc, course_out))
+        return items
+
+    async def course_students(self, course_id: str, instructor: dict) -> List[CourseStudentOut]:
+        await CourseService(self.db)._require_owner_or_admin(course_id, instructor)
+        cursor = self.db.enrollments.find({"courseId": course_id}).sort("enrolledAt", -1)
+        items: List[CourseStudentOut] = []
+        async for enrollment in cursor:
+            student = await self.db.users.find_one(
+                {"_id": parse_object_id(enrollment["studentId"], "student id")},
+                {"firstName": 1, "lastName": 1, "email": 1, "profileImage": 1},
+            )
+            if not student:
+                continue
+            name = f"{student.get('firstName', '')} {student.get('lastName', '')}".strip()
+            items.append(
+                CourseStudentOut(
+                    studentId=enrollment["studentId"],
+                    studentName=name or "Learner",
+                    studentEmail=student.get("email", ""),
+                    profileImage=student.get("profileImage", ""),
+                    enrolledAt=enrollment.get("enrolledAt", datetime.now(timezone.utc)),
+                    status=enrollment.get("status", EnrollmentStatus.ACTIVE.value),
+                    progressPercentage=int(enrollment.get("progressPercentage", 0)),
+                )
+            )
         return items
 
     async def require_enrollment(self, course_id: str, student_id: str) -> dict:

@@ -21,6 +21,16 @@ class EnrollmentOut(BaseModel):
     course: Optional[CourseOut] = None
 
 
+class CourseStudentOut(BaseModel):
+    studentId: str
+    studentName: str
+    studentEmail: str
+    profileImage: str = ""
+    enrolledAt: datetime
+    status: EnrollmentStatus
+    progressPercentage: int
+
+
 class LessonProgressOut(BaseModel):
     id: str
     studentId: str

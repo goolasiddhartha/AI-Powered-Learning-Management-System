@@ -31,3 +31,16 @@ async def my_courses(
         data=[item.model_dump(mode="json") for item in items],
         message="Enrollments retrieved successfully",
     )
+
+
+@router.get("/courses/{course_id}/enrollments")
+async def course_students(
+    course_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: dict = Depends(require_role(UserRole.INSTRUCTOR.value, UserRole.ADMIN.value)),
+):
+    items = await EnrollmentService(db).course_students(course_id, current_user)
+    return success(
+        data=[item.model_dump(mode="json") for item in items],
+        message="Course learners retrieved successfully",
+    )

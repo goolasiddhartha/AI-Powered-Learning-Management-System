@@ -37,8 +37,8 @@ interface NavItem {
   styles: [`
     .sidebar {
       width: var(--sidebar-width);
-      background: white;
-      border-right: 1px solid var(--color-neutral-200);
+      background: #fffefa;
+      border-right: 1px solid #eae9e2;
       padding: 16px 0;
       overflow-y: auto;
       height: calc(100vh - var(--navbar-height));
@@ -46,6 +46,7 @@ interface NavItem {
       top: var(--navbar-height);
       flex-shrink: 0;
       transition: transform 0.3s ease;
+      box-shadow: 4px 0 20px #27352b05;
     }
     .nav-group { margin-bottom: 24px; }
     .nav-group-label {
@@ -56,7 +57,7 @@ interface NavItem {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--color-neutral-400);
+      color: #92958a;
     }
     .nav-item {
       display: flex;
@@ -64,18 +65,20 @@ interface NavItem {
       gap: 12px;
       padding: 10px 24px;
       font-size: 0.875rem;
-      color: var(--color-neutral-600);
-      transition: all 0.15s;
+      color: #686c63;
+      transition: all 0.2s ease;
       border-left: 3px solid transparent;
+      border-radius: 0 999px 999px 0;
+      margin-right: 12px;
     }
     .nav-item:hover {
-      background: var(--color-neutral-50);
-      color: var(--color-neutral-900);
+      background: #f2f3ec;
+      color: #315d4f;
     }
     .nav-item.active {
-      background: var(--color-primary-50);
-      color: var(--color-primary-700);
-      border-left-color: var(--color-primary-600);
+      background: #e9eee3;
+      color: #315d4f;
+      border-left-color: #76936b;
       font-weight: 600;
     }
     .nav-icon { display: flex; width: 20px; height: 20px; align-items: center; }

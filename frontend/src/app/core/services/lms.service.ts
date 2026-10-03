@@ -35,6 +35,16 @@ export interface AccessLessonData {
   nextLessonId: string | null;
 }
 
+export interface CourseEnrollment {
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  profileImage: string;
+  enrolledAt: string;
+  status: Enrollment['status'];
+  progressPercentage: number;
+}
+
 export interface RecommendationItem {
   type: string;
   title: string;
@@ -72,6 +82,14 @@ export class LmsService {
   myEnrollments(): Promise<Enrollment[]> {
     return firstValueFrom(
       this.http.get<ApiResponse<Enrollment[]>>(`${this.api}/enrollments/my-courses`)
+    ).then((r) => r.data ?? []);
+  }
+
+  courseEnrollments(courseId: string): Promise<CourseEnrollment[]> {
+    return firstValueFrom(
+      this.http.get<ApiResponse<CourseEnrollment[]>>(
+        `${this.api}/courses/${courseId}/enrollments`
+      )
     ).then((r) => r.data ?? []);
   }
 
